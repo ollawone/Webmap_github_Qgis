@@ -1,250 +1,38 @@
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <!-- Mobile meta tags to go in head-->
-		<meta name="HandheldFriendly" content="True">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-		<meta name="MobileOptimized" content="320"/>
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta http-equiv="cleartype" content="on">
-        <meta name="mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <link rel="stylesheet" href="css/leaflet.css"><link rel="stylesheet" href="css/L.Control.Locate.min.css">
-        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
-        <link rel="stylesheet" href="css/leaflet-search.css">
-        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
-        <link rel="stylesheet" href="css/leaflet-measure.css">
-        <style>
-        html, body, #map {
-            width: 100%;
-            height: 100%;
-            padding: 0;
-            margin: 0;
-        }.leaflet-popup-content {
-		min-width: 200px;
-		min-height: 100px;
-		overflow-y: scroll;
-		}
-        </style>
-        <title></title>
-    </head>
-    <body>
-        <div id="map">
-        </div>
-        <script src="js/qgis2web_expressions.js"></script>
-        <script src="js/leaflet.js"></script><script src="js/L.Control.Locate.min.js"></script>
-        <script src="js/leaflet.rotatedMarker.js"></script>
-        <script src="js/leaflet.pattern.js"></script>
-        <script src="js/leaflet-hash.js"></script>
-        <script src="js/Autolinker.min.js"></script>
-        <script src="js/rbush.min.js"></script>
-        <script src="js/labelgun.min.js"></script>
-        <script src="js/labels.js"></script>
-        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
-        <script src="js/leaflet-measure.js"></script>
-        <script src="js/proj4.js"></script>
-        <script src="js/proj4leaflet.js"></script>
-        <script src="js/leaflet-search.js"></script>
-        <script src="data/ViolenceRiskForecastWeek312022_1.js"></script>
-        <script>
-        var highlightLayer;
-        function highlightFeature(e) {
-            highlightLayer = e.target;
-            highlightLayer.openPopup();
-        }
-        var crs = new L.Proj.CRS('EPSG:3857', '+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs', {
-            resolutions: [2800, 1400, 700, 350, 175, 84, 42, 21, 11.2, 5.6, 2.8, 1.4, 0.7, 0.35, 0.14, 0.07],
-        });
-        var map = L.map('map', {
-            crs: crs,
-            continuousWorld: false,
-            worldCopyJump: false, 
-            zoomControl:true, maxZoom:28, minZoom:1
-        })
-        var hash = new L.Hash(map);
-        map.attributionControl.setPrefix('<a href="https://github.com/ollawone/Webmap_github_Qgis" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
-        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
-        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
-        var measureControl = new L.Control.Measure({
-            position: 'topleft',
-            primaryLengthUnit: 'meters',
-            secondaryLengthUnit: 'kilometers',
-            primaryAreaUnit: 'sqmeters',
-            secondaryAreaUnit: 'hectares'
-        });
-        measureControl.addTo(map);
-        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
-        .innerHTML = '';
-        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
-        .className += ' fas fa-ruler';
-        var bounds_group = new L.featureGroup([]);
-        function setBounds() {
-            if (bounds_group.getLayers().length) {
-                map.fitBounds(bounds_group.getBounds());
-            }
-            map.setMaxBounds(map.getBounds());
-        }
-        map.createPane('pane_GoogleMaps_0');
-        map.getPane('pane_GoogleMaps_0').style.zIndex = 400;
-        var layer_GoogleMaps_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
-            pane: 'pane_GoogleMaps_0',
-            opacity: 1.0,
-            attribution: '',
-            minZoom: 1,
-            maxZoom: 28,
-            minNativeZoom: 0,
-            maxNativeZoom: 19
-        });
-        layer_GoogleMaps_0;
-        map.addLayer(layer_GoogleMaps_0);
-        function pop_ViolenceRiskForecastWeek312022_1(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    if (typeof layer.closePopup == 'function') {
-                        layer.closePopup();
-                    } else {
-                        layer.eachLayer(function(feature){
-                            feature.closePopup()
-                        });
-                    }
-                },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr>\
-                        <td colspan="2"><strong>Risk_Class</strong><br />' + (feature.properties['Risk_Class'] !== null ? autolinker.link(feature.properties['Risk_Class'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2"><strong>Risk_Rank</strong><br />' + (feature.properties['Risk_Rank'] !== null ? autolinker.link(feature.properties['Risk_Rank'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2"><strong>State</strong><br />' + (feature.properties['State'] !== null ? autolinker.link(feature.properties['State'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2"><strong>LGA</strong><br />' + (feature.properties['LGA'] !== null ? autolinker.link(feature.properties['LGA'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <td colspan="2"><strong>Ward</strong><br />' + (feature.properties['Ward'] !== null ? autolinker.link(feature.properties['Ward'].toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            layer.bindPopup(popupContent, {maxHeight: 400});
-        }
+<!DOCTYPE html>
+<html lang="pt-br">
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>WardForecastingWK31</title>
 
-        function style_ViolenceRiskForecastWeek312022_1_0(feature) {
-            switch(String(feature.properties['Risk_Class'])) {
-                case '1':
-                    return {
-                pane: 'pane_ViolenceRiskForecastWeek312022_1',
-                opacity: 1,
-                color: 'rgba(35,35,35,0.242)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(255,245,240,0.242)',
-                interactive: true,
-            }
-                    break;
-                case '2':
-                    return {
-                pane: 'pane_ViolenceRiskForecastWeek312022_1',
-                opacity: 1,
-                color: 'rgba(35,35,35,0.242)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(252,190,165,0.242)',
-                interactive: true,
-            }
-                    break;
-                case '3':
-                    return {
-                pane: 'pane_ViolenceRiskForecastWeek312022_1',
-                opacity: 1,
-                color: 'rgba(35,35,35,0.242)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(251,112,80,0.242)',
-                interactive: true,
-            }
-                    break;
-                case '4':
-                    return {
-                pane: 'pane_ViolenceRiskForecastWeek312022_1',
-                opacity: 1,
-                color: 'rgba(35,35,35,0.242)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(211,32,32,0.242)',
-                interactive: true,
-            }
-                    break;
-                case '5':
-                    return {
-                pane: 'pane_ViolenceRiskForecastWeek312022_1',
-                opacity: 1,
-                color: 'rgba(35,35,35,0.242)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(103,0,13,0.242)',
-                interactive: true,
-            }
-                    break;
-            }
-        }
-        map.createPane('pane_ViolenceRiskForecastWeek312022_1');
-        map.getPane('pane_ViolenceRiskForecastWeek312022_1').style.zIndex = 401;
-        map.getPane('pane_ViolenceRiskForecastWeek312022_1').style['mix-blend-mode'] = 'normal';
-        var layer_ViolenceRiskForecastWeek312022_1 = new L.geoJson(json_ViolenceRiskForecastWeek312022_1, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_ViolenceRiskForecastWeek312022_1',
-            layerName: 'layer_ViolenceRiskForecastWeek312022_1',
-            pane: 'pane_ViolenceRiskForecastWeek312022_1',
-            onEachFeature: pop_ViolenceRiskForecastWeek312022_1,
-            style: style_ViolenceRiskForecastWeek312022_1_0,
-        });
-        bounds_group.addLayer(layer_ViolenceRiskForecastWeek312022_1);
-        map.addLayer(layer_ViolenceRiskForecastWeek312022_1);
-        var osmGeocoder = new L.Control.Geocoder({
-            collapsed: true,
-            position: 'topleft',
-            text: 'Search',
-            title: 'Testing'
-        }).addTo(map);
-        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
-        .className += ' fa fa-search';
-        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
-        .title += 'Search for a place';
-        var baseMaps = {};
-        L.control.layers(baseMaps,{'Violence Risk Forecast Week 31 2022<br /><table><tr><td style="text-align: center;"><img src="legend/ViolenceRiskForecastWeek312022_1_VeryLowRisk0.png" /></td><td>Very Low Risk</td></tr><tr><td style="text-align: center;"><img src="legend/ViolenceRiskForecastWeek312022_1_LowRisk1.png" /></td><td>Low Risk</td></tr><tr><td style="text-align: center;"><img src="legend/ViolenceRiskForecastWeek312022_1_ModerateRisk2.png" /></td><td>Moderate Risk</td></tr><tr><td style="text-align: center;"><img src="legend/ViolenceRiskForecastWeek312022_1_HighRisk3.png" /></td><td>High Risk</td></tr><tr><td style="text-align: center;"><img src="legend/ViolenceRiskForecastWeek312022_1_VeryHighRisk4.png" /></td><td>Very High Risk</td></tr></table>': layer_ViolenceRiskForecastWeek312022_1,"Google Maps": layer_GoogleMaps_0,}).addTo(map);
-        setBounds();
-        map.addControl(new L.Control.Search({
-            layer: layer_ViolenceRiskForecastWeek312022_1,
-            initial: false,
-            hideMarkerOnCollapse: true,
-            propertyName: 'Ward'}));
-        document.getElementsByClassName('search-button')[0].className +=
-         ' fa fa-binoculars';
-        </script>
-    </body>
+		<link rel="stylesheet" type="text/css" href="javascript/style.css" />
+		<link rel="stylesheet" type="text/css" href="leaflet/leaflet.css"/>
+
+		<script type="text/javascript" src="leaflet/leaflet.js"></script>
+		<script type="text/javascript" src="javascript/tab.js"></script>
+
+		<!-- Caminhos paras os dados das camadas -->
+		<script type="text/javascript" src="data/_Violence_Risk_Forecast_Week_31_2022.js"></script>
+	</head>
+	<body>
+		<div class="title">
+			<h1>WardForecastingWK31</h1>
+		</div>
+		<div class="maintab">
+			<button id="mapBtn" class="mainTablinks" onclick="openMainTab(event, 'mapArea')">Mapa</button>
+			<button class="mainTablinks" onclick="openMainTab(event, 'attributesArea')">Tabelas de Atributos</button>
+		</div>
+		<div id="mapArea" class="mainTabContent">
+			<div id="map"></div>
+		</div>
+
+		<div id="attributesArea" class="mainTabContent">
+			<div class="tab">
+				<button id="_Violence_Risk_Forecast_Week_31_2022_btn" class="tablinks" onclick="openTab(event, '_Violence_Risk_Forecast_Week_31_2022_tab')">Violence Risk Forecast Week 31 2022</button>
+			</div>
+			<div id="_Violence_Risk_Forecast_Week_31_2022_tab" class="tabcontent"></div>
+		</div>
+		<script type="text/javascript" src="javascript/map.js"></script>
+		<script type="text/javascript" src="javascript/attributes.js"></script>
+		<script>document.getElementById('mapBtn').click();</script>	</body>
 </html>
